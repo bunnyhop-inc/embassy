@@ -246,7 +246,7 @@ impl embassy_net::Device for Device {
         }
     }
 
-    fn capabilities(&mut self) -> embassy_net::DeviceCapabilities {
+    fn capabilities(&self) -> embassy_net::DeviceCapabilities {
         let mut caps = embassy_net::DeviceCapabilities::default();
         caps.max_transmission_unit = 1514; // 1500 IP + 14 ethernet header
         caps.medium = embassy_net::Medium::Ethernet;
@@ -270,10 +270,4 @@ impl embassy_net::Device for Device {
     fn ethernet_address(&self) -> [u8; 6] {
         self.mac_addr
     }
-}
-
-#[no_mangle]
-fn _embassy_rand(buf: &mut [u8]) {
-    // TODO
-    buf.fill(0x42)
 }

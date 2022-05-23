@@ -68,17 +68,6 @@ async fn net_task() {
     embassy_net::run().await
 }
 
-#[no_mangle]
-fn _embassy_rand(buf: &mut [u8]) {
-    use rand_core::RngCore;
-
-    critical_section::with(|_| unsafe {
-        unwrap!(RNG_INST.as_mut()).fill_bytes(buf);
-    });
-}
-
-static mut RNG_INST: Option<Rng<RNG>> = None;
-
 static EXECUTOR: Forever<Executor> = Forever::new();
 static STATE: Forever<State<'static, ETH, 4, 4>> = Forever::new();
 static ETH: Forever<Ethernet<'static, ETH, GenericSMI, 4, 4>> = Forever::new();
