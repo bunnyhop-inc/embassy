@@ -601,6 +601,12 @@ where
     pub async fn set_lora_sync_word(&mut self) -> Result<(), Error<E, CS::Error, RESET::Error>> {
         self.write_register(Register::RegSyncWord as u8, 0x34).await
     }
+
+    pub async fn set_lora_private_sync_word(
+        &mut self,
+    ) -> Result<(), Error<E, CS::Error, RESET::Error>> {
+        self.write_register(Register::RegSyncWord as u8, 0x12).await
+    }
 }
 /// Modes of the radio and their corresponding register values.
 #[derive(Clone, Copy)]
