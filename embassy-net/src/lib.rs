@@ -23,6 +23,9 @@ pub use stack::{
 #[cfg(feature = "tcp")]
 pub mod tcp;
 
+#[cfg(feature = "udp")]
+pub mod udp;
+
 // smoltcp reexports
 pub use smoltcp::phy::{DeviceCapabilities, Medium};
 pub use smoltcp::time::Duration as SmolDuration;
