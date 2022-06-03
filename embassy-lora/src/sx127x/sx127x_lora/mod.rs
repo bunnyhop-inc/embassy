@@ -6,7 +6,7 @@
 #![allow(dead_code)]
 
 use bit_field::BitField;
-use embassy::time::{Duration, Timer};
+use embassy::time::{Duration, Instant, Timer};
 use embedded_hal::digital::v2::OutputPin;
 use embedded_hal_async::spi::SpiBus;
 
@@ -600,6 +600,57 @@ where
 
     pub async fn set_lora_sync_word(&mut self) -> Result<(), Error<E, CS::Error, RESET::Error>> {
         self.write_register(Register::RegSyncWord as u8, 0x34).await
+    }
+
+    pub async fn set_lora_private_sync_word(
+        &mut self,
+    ) -> Result<(), Error<E, CS::Error, RESET::Error>> {
+        self.write_register(Register::RegSyncWord as u8, 0x12).await
+    }
+
+    pub async fn carrier_sense(
+        &mut self,
+        rssi_threshold: i32,
+        max_time: Duration,
+    ) -> Result<bool, Error<E, CS::Error, RESET::Error>> {
+        // FSK
+        // // LongRangeModeの切り替えにはStdby > Sleep(LoRa) > Sleep(FSK)で切り替える必要
+        // self.set_mode(RadioMode::Stdby).await?; // Stdby(LoRa)
+        // self.set_mode(RadioMode::Sleep).await?; // Sleep(LoRa)
+        // self.write_register(Register::RegOpMode.addr(), 0b0000_0000)
+        //     .await?; // Sleep(FSK)
+        // self.write_register(Register::RegOpMode.addr(), 0b0000_0101)
+        //     .await?; // RxMode(FSK)
+
+        self.set_mode(RadioMode::RxContinuous).await?;
+
+        // hold on a bit, radio turn-around time
+        Timer::after(Duration::from_millis(10)).await;
+
+        let ins = Instant::now();
+        let mut result = false;
+        loop {
+            let rssi = self.read_register(0x1b).await? as i32 - 157; // RegRssiValue 0x1b
+
+            if rssi > rssi_threshold {
+                break;
+            }
+
+            if ins.elapsed() > max_time {
+                result = true;
+                break;
+            }
+        }
+
+        // FSK
+        // self.write_register(Register::RegOpMode.addr(), 0b0000_0000)
+        //     .await?; // Sleep(FSK)
+        // self.set_mode(RadioMode::Sleep).await?; // Sleep(LoRa)
+        // self.set_mode(RadioMode::Stdby).await?; // Stdby(LoRa)
+
+        self.set_mode(RadioMode::Stdby).await?;
+
+        Ok(result)
     }
 }
 /// Modes of the radio and their corresponding register values.

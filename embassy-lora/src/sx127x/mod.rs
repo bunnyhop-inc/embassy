@@ -7,7 +7,7 @@ use lorawan_device::async_device::{
     Timings,
 };
 
-mod sx127x_lora;
+pub mod sx127x_lora;
 use sx127x_lora::{Error as RadioError, LoRa, RadioMode, IRQ};
 
 /// Trait representing a radio switch for boards using the Sx127x radio. One some
