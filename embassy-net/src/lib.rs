@@ -30,6 +30,8 @@ pub mod udp;
 pub use smoltcp::phy::{DeviceCapabilities, Medium};
 pub use smoltcp::time::Duration as SmolDuration;
 pub use smoltcp::time::Instant as SmolInstant;
+pub use smoltcp::Error as SmolError;
+
 #[cfg(feature = "medium-ethernet")]
 pub use smoltcp::wire::{EthernetAddress, HardwareAddress};
 pub use smoltcp::wire::{IpAddress, IpCidr, Ipv4Address, Ipv4Cidr};
