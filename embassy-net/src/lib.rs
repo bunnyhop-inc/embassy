@@ -1,6 +1,7 @@
 #![cfg_attr(not(feature = "std"), no_std)]
 #![allow(clippy::new_without_default)]
 #![feature(generic_associated_types, type_alias_impl_trait)]
+#![feature(stmt_expr_attributes)]
 
 // This mod MUST go first, so that the others see its macros.
 pub(crate) mod fmt;
@@ -17,7 +18,8 @@ pub use config::{Config, Configurator, Event as ConfigEvent, StaticConfigurator}
 pub use device::{Device, LinkState};
 pub use packet_pool::{Packet, PacketBox, PacketBoxExt, PacketBuf, MTU};
 pub use stack::{
-    config, ethernet_address, init, is_config_up, is_init, is_link_up, run, StackResources,
+    config, ethernet_address, init, is_config_up, is_init, is_link_up, join_multicast_group,
+    leave_multicast_group, run, StackResources,
 };
 
 #[cfg(feature = "tcp")]

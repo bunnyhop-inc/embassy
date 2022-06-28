@@ -26,6 +26,8 @@ use crate::{Config, Interface};
 const LOCAL_PORT_MIN: u16 = 1025;
 const LOCAL_PORT_MAX: u16 = 65535;
 
+static mut IPV4_MULTICAST_GROUPS: [Option<(Ipv4Address, ())>; 10] = [None; 10];
+
 pub struct StackResources<const ADDR: usize, const SOCK: usize, const NEIGHBOR: usize> {
     addresses: [IpCidr; ADDR],
     sockets: [SocketStorage<'static>; SOCK],
@@ -195,6 +197,8 @@ pub fn init<const ADDR: usize, const SOCK: usize, const NEIGH: usize>(
         b = b.routes(Routes::new(&mut resources.routes[..]));
     }
 
+    b = b.ipv4_multicast_groups(unsafe { &mut IPV4_MULTICAST_GROUPS[..] });
+
     let iface = b.finalize();
 
     let local_port = loop {
@@ -253,6 +257,26 @@ pub async fn run() -> ! {
     })
     .await;
     unreachable!()
+}
+
+pub fn join_multicast_group<T: Into<IpAddress>>(addr: T) -> Result<bool, smoltcp::Error> {
+    Stack::with(|stack| {
+        let res = stack
+            .iface
+            .join_multicast_group(addr, instant_to_smoltcp(Instant::now()));
+        stack.wake();
+        res
+    })
+}
+
+pub fn leave_multicast_group<T: Into<IpAddress>>(addr: T) -> Result<bool, smoltcp::Error> {
+    Stack::with(|stack| {
+        let res = stack
+            .iface
+            .leave_multicast_group(addr, instant_to_smoltcp(Instant::now()));
+        stack.wake();
+        res
+    })
 }
 
 fn instant_to_smoltcp(instant: Instant) -> SmolInstant {
